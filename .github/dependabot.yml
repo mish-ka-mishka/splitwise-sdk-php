@@ -1,0 +1,17 @@
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    target-branch: develop
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: composer
+    target-branch: develop
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase

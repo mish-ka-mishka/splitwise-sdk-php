@@ -1,0 +1,16 @@
+* text=auto eol=lf
+/.github export-ignore
+/app export-ignore
+/bootstrap export-ignore
+/config export-ignore
+/storage export-ignore
+/tests export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.php-cs-fixer.php export-ignore
+/application export-ignore
+/composer.lock export-ignore
+/phpstan.php export-ignore
+/phpunit.xml.dist export-ignore
+/rector.php export-ignore

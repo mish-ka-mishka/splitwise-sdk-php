@@ -1,0 +1,81 @@
+{
+    "name": "mkaverin/splitwise-sdk-php",
+    "description": "PHP SDK for Splitwise API v3",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Michael Kaverin",
+            "email": "m@kaverin.ml"
+        }
+    ],
+    "homepage": "https://github.com/mkaverin/splitwise-sdk-php",
+    "require": {
+        "php": "^8.3",
+        "saloonphp/saloon": "^3.0"
+    },
+    "require-dev": {
+        "airlst/php-cs-fixer-config": "^3.6",
+        "airlst/phpstan-config": "dev-master",
+        "airlst/rector-config": "dev-master",
+        "crescat-io/saloon-sdk-generator": "^1.10",
+        "ergebnis/composer-normalize": "^2.47",
+        "fakerphp/faker": "^1.9.1",
+        "friendsofphp/php-cs-fixer": "^3.75",
+        "illuminate/database": "^10.0",
+        "laravel-zero/framework": "^10.0",
+        "laravel/pint": "^1.8",
+        "mockery/mockery": "^1.5.1",
+        "pestphp/pest": "^2.5",
+        "phpstan/phpstan": "^2.1",
+        "rector/swiss-knife": "^2.2"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "MKaverin\\SplitwiseSDK\\": "build/",
+            "MKaverin\\SplitwiseSDK\\SDKBuilder\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MKaverin\\SplitwiseSDK\\SDKBuilder\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true
+        },
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "scripts": {
+        "ci": [
+            "@composer dump --strict-psr",
+            "@composer normalize",
+            "@composer rector",
+            "@composer cs-fixer",
+            "@composer phpstan",
+            "@composer test"
+        ],
+        "cs-fixer": "PHP_CS_FIXER_IGNORE_ENV=1 ./vendor/bin/php-cs-fixer fix --verbose --config=.php-cs-fixer.php",
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" --names=server,queue,logs"
+        ],
+        "phpstan": "./vendor/bin/phpstan analyse -c phpstan.php --memory-limit=2G",
+        "rector": "./vendor/bin/rector",
+        "test": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php application test --stop-on-failure"
+        ],
+        "test-coverage": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php -dpcov.enabled=1 application test --stop-on-failure --coverage-html /var/www/html/.coverage/backend"
+        ]
+    }
+}

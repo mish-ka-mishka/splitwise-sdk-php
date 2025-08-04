@@ -1,0 +1,179 @@
+name: CI
+
+env:
+  COMPOSE_INTERACTIVE_NO_CLI: 1
+  PHP_CS_FIXER_IGNORE_ENV: 1
+  LARAVEL_BYPASS_ENV_CHECK: 1
+
+on:
+  pull_request:
+    branches: [develop, main, master]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  rector:
+    name: Code style (rector)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --ignore-platform-reqs --no-scripts
+
+      - name: Check PSR-4 compliance
+        run: composer dump --strict-psr
+
+      - name: Cache Rector cache files
+        uses: actions/cache@v4
+        with:
+          path: storage/framework/cache/rector
+          key: ${{ github.base_ref }}-rector-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ github.base_ref }}-rector-
+
+      - name: Run rector
+        run: ./vendor/bin/rector
+
+      - name: Commit changes from rector
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '[rector] Rector fixes'
+          commit_author: 'GitHub Action <actions@github.com>'
+          commit_user_email: 'action@github.com'
+
+  php-cs-fixer:
+    needs: [rector]
+    name: Code style (php-cs-fixer)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: none
+
+      - name: Cache CS Fixer cache file
+        uses: actions/cache@v4
+        with:
+          path: .php-cs-fixer.cache
+          key: ${{ github.base_ref }}-csfixer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ github.base_ref }}-csfixer-
+
+      - name: Install Composer dependencies
+        run: composer install --ignore-platform-reqs --no-scripts
+
+      - name: Run php-cs-fixer
+        run: ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php
+
+      - name: Commit changes from php-cs-fixer
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '[php-cs-fixer] php-cs-fixer fixes'
+          commit_author: 'GitHub Action <actions@github.com>'
+          commit_user_email: 'action@github.com'
+
+  phpstan:
+    needs: [ php-cs-fixer ]
+    name: Static analysis (phpstan)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --ignore-platform-reqs --no-scripts
+
+      - name: Cache PHPStan cache files
+        uses: actions/cache@v4
+        with:
+          path: storage/framework/cache/phpstan
+          key: ${{ github.base_ref }}-phpstan-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ github.base_ref }}-phpstan-
+
+      - name: Run phpstan
+        run: ./vendor/bin/phpstan analyse -c phpstan.php --error-format=github
+
+  pest:
+    needs: [ phpstan ]
+    name: Tests (pest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, gd, exif, imagick
+          coverage: pcov
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts
+
+      - name: Run tests
+        run: php application test --env=ci --parallel --stop-on-failure
+
+  security:
+    name: Security Checker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache database
+        uses: actions/cache@v4
+        with:
+          path: ~/.symfony/cache
+          key: security-checker
+
+      - name: Run security checker
+        uses: symfonycorp/security-checker-action@v5

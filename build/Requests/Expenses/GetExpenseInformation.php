@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MKaverin\SplitwiseSDK\Requests\Expenses;
+
+use Saloon\Enums\Method;
+use Saloon\Http\Request;
+
+/**
+ * Get expense information.
+ */
+class GetExpenseInformation extends Request
+{
+    protected Method $method = Method::GET;
+
+    public function __construct(
+        protected int $id,
+    ) {}
+
+    public function resolveEndpoint(): string
+    {
+        return "/get_expense/{$this->id}";
+    }
+}
