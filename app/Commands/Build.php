@@ -43,7 +43,7 @@ class Build extends Command
         $specFile = storage_path('openapi.json');
 
         if ($this->option('no-download') === false) {
-            if (filter_var($this->argument('spec-url'), \FILTER_VALIDATE_URL) === false) {
+            if (filter_var($this->argument('spec-url'), FILTER_VALIDATE_URL) === false) {
                 $this->error('Invalid specification URL provided.');
 
                 return;
@@ -57,7 +57,7 @@ class Build extends Command
                 return;
             }
 
-            file_put_contents($specFile, json_encode(json_decode($spec), \JSON_PRETTY_PRINT));
+            file_put_contents($specFile, json_encode(json_decode($spec), JSON_PRETTY_PRINT));
         }
 
         if (! file_exists($specFile)) {

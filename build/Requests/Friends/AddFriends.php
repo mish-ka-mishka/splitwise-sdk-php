@@ -15,10 +15,10 @@ use Saloon\Traits\Body\HasJsonBody;
  * Add multiple friends at once.
  *
  * For each user, if the other user does not exist, you must supply
- * `friends__{index}__first_name`.
+ * `users__{index}__first_name`.
  *
  * **Note**: user parameters must be flattened into the format
- * `friends__{index}__{property}`, where
+ * `users__{index}__{property}`, where
  * `property` is `first_name`, `last_name`, or `email`.
  */
 class AddFriends extends Request implements HasBody

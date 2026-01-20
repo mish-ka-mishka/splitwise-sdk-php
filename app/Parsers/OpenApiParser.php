@@ -112,6 +112,12 @@ class OpenApiParser extends Parser
                 $properties = array_merge($properties, $props);
             }
         }
+        if ($schema->oneOf !== null) {
+            foreach ($schema->oneOf as $subSchema) {
+                $props = $this->resolveAllOfProperties($this->resolveRef($subSchema)); // @phpstan-ignore-line
+                $properties = array_merge($properties, $props);
+            }
+        }
         if ($schema->properties !== null) {
             return array_merge($properties, $schema->properties);
         }

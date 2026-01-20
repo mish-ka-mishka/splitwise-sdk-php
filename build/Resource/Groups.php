@@ -47,9 +47,14 @@ class Groups extends Resource
         return $this->connector->send(new RestoreGroup($id));
     }
 
-    public function addUserToGroup(): Response
-    {
-        return $this->connector->send(new AddUserToGroup());
+    public function addUserToGroup(
+        int $groupId,
+        ?int $userId = null,
+        ?string $firstName = null,
+        ?string $lastName = null,
+        ?string $email = null,
+    ): Response {
+        return $this->connector->send(new AddUserToGroup($groupId, $userId, $firstName, $lastName, $email));
     }
 
     public function removeUserFromGroup(int $groupId, int $userId): Response

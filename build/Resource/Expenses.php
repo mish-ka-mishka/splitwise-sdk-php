@@ -37,9 +37,39 @@ class Expenses extends Resource
         return $this->connector->send(new ListTheCurrentUserExpenses($groupId, $friendId, $datedAfter, $datedBefore, $updatedAfter, $updatedBefore, $limit, $offset));
     }
 
-    public function createExpense(): Response
-    {
-        return $this->connector->send(new CreateExpense());
+    /**
+     * @param string $cost            A string representation of a decimal value, limited to 2 decimal places
+     * @param string $description     A short description of the expense
+     * @param string $details         Also known as "notes."
+     * @param string $date            The date and time the expense took place. May differ from `created_at`
+     * @param string $currencyCode    A currency code. Must be in the list from `get_currencies`
+     * @param int    $categoryId      A category id from `get_categories`
+     * @param int    $groupId         the group to put this expense in, or `0` to create an expense outside of a group
+     * @param string $users0PaidShare Decimal amount as a string with 2 decimal places. The amount this user paid for the expense
+     * @param string $users0OwedShare Decimal amount as a string with 2 decimal places. The amount this user owes for the expense
+     * @param string $users1PaidShare Decimal amount as a string with 2 decimal places. The amount this user paid for the expense
+     * @param string $users1OwedShare Decimal amount as a string with 2 decimal places. The amount this user owes for the expense
+     */
+    public function createExpense(
+        ?string $cost = null,
+        ?string $description = null,
+        ?string $details = null,
+        ?string $date = null,
+        ?string $repeatInterval = null,
+        ?string $currencyCode = null,
+        ?int $categoryId = null,
+        ?int $groupId = null,
+        ?bool $splitEqually = null,
+        ?int $users0UserId = null,
+        ?string $users0PaidShare = null,
+        ?string $users0OwedShare = null,
+        ?string $users1FirstName = null,
+        ?string $users1LastName = null,
+        ?string $users1Email = null,
+        ?string $users1PaidShare = null,
+        ?string $users1OwedShare = null,
+    ): Response {
+        return $this->connector->send(new CreateExpense($cost, $description, $details, $date, $repeatInterval, $currencyCode, $categoryId, $groupId, $splitEqually, $users0UserId, $users0PaidShare, $users0OwedShare, $users1FirstName, $users1LastName, $users1Email, $users1PaidShare, $users1OwedShare));
     }
 
     /**
